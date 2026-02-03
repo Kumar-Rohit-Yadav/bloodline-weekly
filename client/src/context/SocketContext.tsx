@@ -21,12 +21,17 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
         if (!user) return;
 
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const socketInstance = io(API_URL, {
+        // Socket.io should connect to the base URL, not the /api route
+        const SOCKET_URL = API_URL.replace('/api', '');
+        
+        const socketInstance = io(SOCKET_URL, {
             withCredentials: true
         });
 
+        console.log(`[SOCKET] 🔗 Connecting to ${SOCKET_URL}...`);
+
         socketInstance.on('connect', () => {
-            console.log('Socket Connected');
+            console.log(`[SOCKET] 🟢 Connected! Session ID: ${socketInstance.id}`);
             setIsConnected(true);
         });
 

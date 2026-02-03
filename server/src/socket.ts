@@ -16,22 +16,28 @@ export const initSocket = (server: HttpServer) => {
     });
 
     io.on('connection', (socket) => {
-        // console.log(`Connected: ${socket.id}`.cyan); // Colors might not be available, use standard log
+        console.log(`[SOCKET] 🟢 New Connection Attempt: ${socket.id}`.cyan);
 
         // Join a specific room (Mission or Direct Connection)
         socket.on('join_room', (roomId) => {
             socket.join(roomId);
-            // console.log(`User joined room: ${roomId}`);
+            console.log(`[SOCKET] 🚪 User ${socket.id} joined Room: ${roomId}`.green);
         });
 
         // Handle Chat Message
         socket.on('send_message', async (data) => {
             const { requestId, connectionId, content, sender } = data;
+            const targetRoom = connectionId || requestId;
+            
+            console.log(`[SOCKET] 📤 Message Sending...`);
+            console.log(`   - FROM: ${sender?.name} (ID: ${sender?._id || sender?.id})`);
+            console.log(`   - ROOM: ${targetRoom}`);
+            console.log(`   - CONTENT: "${content?.substring(0, 50)}..."`);
 
             try {
                 const messageData: any = {
                     request: requestId,
-                    sender: sender._id,
+                    sender: sender._id || sender.id,
                     content
                 };
 
@@ -40,56 +46,55 @@ export const initSocket = (server: HttpServer) => {
                 }
 
                 const newMessage = await Message.create(messageData);
+                console.log(`[SOCKET] ✅ Message saved to DB (ID: ${newMessage._id})`);
 
                 // If it's a direct connection, update the connection metadata
                 if (connectionId) {
-                    const ChatConnection = (await import('./models/ChatConnection')).default;
-                    await ChatConnection.findByIdAndUpdate(connectionId, {
-                        lastMessage: content,
-                        lastMessageAt: new Date()
-                    });
+                    try {
+                        const ChatConnection = (await import('./models/ChatConnection')).default;
+                        await ChatConnection.findByIdAndUpdate(connectionId, {
+                            lastMessage: content,
+                            lastMessageAt: new Date()
+                        });
+                        console.log(`[SOCKET] 🔄 Updated ChatConnection lastMessage`);
+                    } catch (e) {
+                        console.error("[SOCKET] ❌ Error updating ChatConnection:", e);
+                    }
                 }
 
                 // Broadcast to the room (Either requestId or connectionId)
-                const targetRoom = connectionId || requestId;
-                io.to(targetRoom).emit('new_message', {
+                const payload = {
                     ...newMessage.toObject(),
                     sender: {
-                        _id: sender._id,
+                        _id: sender._id || sender.id,
                         name: sender.name,
                         profileImage: sender.profileImage,
                         role: sender.role,
                         facilityName: sender.facilityName
                     }
-                });
+                };
+
+                // Check room participants
+                const clients = await io.in(targetRoom).fetchSockets();
+                console.log(`[SOCKET] 📢 Broadcasting to ${clients.length} clients in Room: ${targetRoom}`);
+
+                io.to(targetRoom).emit('new_message', payload);
 
                 // NOTIFICATION LOGIC
-                // ... existing logic remains similar but can be refined for direct connections
+                // ... (existing logic)
                 const BloodRequest = (await import('./models/BloodRequest')).default;
                 const request = await BloodRequest.findById(requestId);
                 if (request) {
-                    // Calculate recipients (Sender != User)
-                    const senderId = sender._id ? sender._id.toString() : '';
+                    const senderId = (sender._id || sender.id)?.toString() || '';
                     const requesterId = request.requester.toString();
                     let recipients: string[] = [];
 
                     if (senderId === requesterId) {
-                        // Sender is Requester -> Notify all Donors who pledged
-                        // Filter accepted/pending pledges
-                        recipients = request.pledges
-                            .map(p => p.donor.toString())
-                            .filter(id => id !== senderId); // Safety check
+                        recipients = request.pledges.map(p => p.donor.toString()).filter(id => id !== senderId);
                     } else {
-                        // Sender is Donor -> Notify Requester
-                        if (requesterId !== senderId) {
-                            recipients.push(requesterId);
-                        }
+                        if (requesterId !== senderId) recipients.push(requesterId);
                     }
-
-                    // Send notifications
-                    // Use Set to avoid duplicates
                     const uniqueRecipients = [...new Set(recipients)];
-
                     for (const recipientId of uniqueRecipients) {
                         await createNotification(
                             recipientId as any,
@@ -97,18 +102,19 @@ export const initSocket = (server: HttpServer) => {
                             `New message from ${sender.name} in mission chat.`,
                             'MESSAGE_ALERT',
                             requestId,
-                            '/dashboard' // Ideally deep link strictly to chat
+                            '/dashboard/messages'
                         );
                     }
+                    console.log(`[SOCKET] 🔔 Notifications sent to ${uniqueRecipients.length} users`);
                 }
 
             } catch (error) {
-                console.error("Socket Message Error:", error);
+                console.error("[SOCKET] ❌ Send Error:", error);
             }
         });
 
         socket.on('disconnect', () => {
-            // console.log(`Disconnected: ${socket.id}`.red);
+            console.log(`[SOCKET] 🛑 Disconnected: ${socket.id}`.red);
         });
     });
 

@@ -97,7 +97,15 @@ export default function CommunicationsCenter() {
         if (!socket) return;
 
         const handleNewMessage = (msg: any) => {
-            if (msg.connection === selectedConnection?._id) {
+            console.log("[CHAT] 📩 New Message Event Received via Socket:", msg);
+            
+            const currentConnId = selectedConnection?._id?.toString();
+            const msgConnId = (msg.connection?._id || msg.connection)?.toString();
+
+            console.log(`[CHAT] Check matching room: Incoming(${msgConnId}) === Current(${currentConnId})`);
+
+            if (msgConnId === currentConnId) {
+                console.log("[CHAT] ✅ Room match! Updating messages list.");
                 setMessages(prev => {
                     // Check if message already exists (either by real ID or by content+sender+recent for optimistic ones)
                     const exists = prev.find(m =>
@@ -105,11 +113,13 @@ export default function CommunicationsCenter() {
                         (m.sender?._id === msg.sender?._id && m.content === msg.content && typeof m._id === 'string' && m._id.startsWith('0.'))
                     );
                     if (exists) {
-                        // Replace optimistic message with real one if needed
+                        console.log("[CHAT] 🔄 Replacing optimistic message with real DB record.");
                         return prev.map(m => (m.content === msg.content && typeof m._id === 'string' && m._id.startsWith('0.')) ? msg : m);
                     }
                     return [...prev, msg];
                 });
+            } else {
+                console.warn("[CHAT] ⚠️ Room mismatch. Ignoring message.");
             }
             // Update last message in connections list
             setConnections(prev => prev.map(conn =>
@@ -144,14 +154,19 @@ export default function CommunicationsCenter() {
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newMessage.trim() || !selectedConnection || !socket) return;
+        console.log("[CHAT] 📤 Attempting to send message...");
+
+        if (!newMessage.trim()) return;
+        if (!selectedConnection) { console.error("[CHAT] ❌ No connection selected!"); return; }
+        if (!socket) { console.error("[CHAT] ❌ Socket not initialized!"); return; }
+        if (!user) { console.error("[CHAT] ❌ User not authenticated!"); return; }
 
         const msgData = {
             connectionId: selectedConnection._id,
-            requestId: selectedConnection.request._id,
+            requestId: selectedConnection.request?._id || selectedConnection.request,
             content: newMessage,
             sender: {
-                _id: user?._id,
+                _id: user?._id || user?.id,
                 name: user?.name,
                 profileImage: user?.profileImage,
                 role: user?.role,
@@ -159,6 +174,7 @@ export default function CommunicationsCenter() {
             }
         };
 
+        console.log("[CHAT] 📡 Emitting 'send_message' with data:", msgData);
         socket.emit('send_message', msgData);
 
         // Add locally

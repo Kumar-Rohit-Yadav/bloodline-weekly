@@ -50,9 +50,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const checkUserLoggedIn = async () => {
         try {
+            console.log("[AUTH] 👔 Checking session via /api/auth/me...");
             const res = await api.get<{ user: User }>('/auth/me');
+            console.log("[AUTH] ✅ Session valid. User:", res.data.user?.name);
             setUser(res.data.user);
-        } catch (error) {
+        } catch (error: any) {
+            if (error.response?.status === 401) {
+                console.warn("[AUTH] 🛑 Session invalid (401). User is unauthenticated.");
+            } else {
+                console.error("[AUTH] ❌ Error checking session:", error.message);
+            }
             setUser(null);
         } finally {
             setLoading(false);

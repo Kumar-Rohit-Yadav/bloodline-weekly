@@ -4,7 +4,7 @@ import { User as UserType } from "@/context/AuthContext";
 import {
     Droplet, Heart, Clock, Navigation, CheckCircle2, AlertCircle,
     ArrowRight, Loader2, ShieldCheck, QrCode, X, BookOpen,
-    MessageCircle, Zap, Globe, MapPin, Activity, Plus, Minus, User, Calendar
+    MessageCircle, Zap, Globe, MapPin, Activity, Plus, Minus, User, Calendar, MessageSquare
 } from "lucide-react";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
@@ -464,6 +464,20 @@ export const DonorDashboard = ({ user }: { user: UserType }) => {
                                                         By: {req.requester?.name || 'Authorized Lab'}
                                                     </span>
                                                 </div>
+
+                                                {/* Case Context Section */}
+                                                {(req.description || req.aiReasoning) && (
+                                                    <div className="bg-gray-50/80 p-5 rounded-3xl border border-gray-100/50 mt-4 relative group/note">
+                                                        <div className="absolute -top-2.5 left-6 px-3 py-1 bg-white border border-gray-100 rounded-full shadow-sm">
+                                                            <p className="text-[8px] font-black text-[#FF1744] uppercase tracking-widest flex items-center gap-2">
+                                                                <MessageSquare size={10} /> Medical Case Note
+                                                            </p>
+                                                        </div>
+                                                        <p className="text-xs font-bold text-gray-600 leading-relaxed italic mt-2">
+                                                            "{req.description || req.aiReasoning}"
+                                                        </p>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="space-y-3">
@@ -580,43 +594,36 @@ export const DonorDashboard = ({ user }: { user: UserType }) => {
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
                     <Card className="max-w-md w-full bg-white rounded-[60px] border-none shadow-2xl animate-in zoom-in-95 overflow-hidden">
                         <CardHeader className="p-12 pb-0 flex flex-row items-center justify-between">
-                            <div className="space-y-1">
-                                <h3 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Final Step</h3>
-                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Security Handshake</p>
-                            </div>
+                             <div className="space-y-1">
+                                 <h3 className="text-3xl font-black text-gray-900 tracking-tighter uppercase leading-none">Security OTP</h3>
+                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Final Step Handshake</p>
+                             </div>
                             <button onClick={() => setVerifyingMission(null)} className="p-4 bg-gray-50 rounded-3xl"><X size={24} /></button>
                         </CardHeader>
                         <CardContent className="p-12 space-y-8">
                             <div className="space-y-6">
-                                <p className="text-lg font-bold text-gray-500 text-center leading-relaxed">
-                                    Confirm donation details and enter the 6-digit code.
-                                </p>
+                                 <p className="text-base font-bold text-gray-500 text-center leading-relaxed">
+                                     Enter the 6-digit secure code provided by the hospital after you complete your donation.
+                                 </p>
 
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between pl-2">
                                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block text-left">Units Donated</label>
                                         <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
-                                            Max {discoveries.find(d => d._id === verifyingMission)?.units - (discoveries.find(d => d._id === verifyingMission)?.collectedUnits || 0)} Units
+                                            Handover {discoveries.find(d => d._id === verifyingMission)?.units - (discoveries.find(d => d._id === verifyingMission)?.collectedUnits || 0)} Units Max
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-[24px] border border-gray-100">
                                         <button
                                             type="button"
                                             onClick={() => setVerifyUnits(Math.max(1, verifyUnits - 1))}
-                                            className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center hover:bg-gray-100 shadow-sm"
+                                            className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center hover:bg-gray-100 shadow-sm transition-all"
                                         >
                                             <Minus size={18} />
                                         </button>
-                                        <input
-                                            type="number"
-                                            value={verifyUnits}
-                                            onChange={(e) => {
-                                                const req = discoveries.find(d => d._id === verifyingMission);
-                                                const max = req ? req.units - (req.collectedUnits || 0) : 1;
-                                                setVerifyUnits(Math.min(max, Math.max(1, parseInt(e.target.value) || 1)));
-                                            }}
-                                            className="flex-1 bg-transparent text-center font-black text-2xl outline-none text-gray-900"
-                                        />
+                                        <div className="flex-1 text-center font-black text-2xl text-gray-900 tracking-tighter">
+                                            {verifyUnits} Units
+                                        </div>
                                         <button
                                             type="button"
                                             onClick={() => {
@@ -624,7 +631,7 @@ export const DonorDashboard = ({ user }: { user: UserType }) => {
                                                 const max = req ? req.units - (req.collectedUnits || 0) : 1;
                                                 if (verifyUnits < max) setVerifyUnits(verifyUnits + 1);
                                             }}
-                                            className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center hover:bg-gray-100 shadow-sm"
+                                            className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center hover:bg-gray-100 shadow-sm transition-all"
                                         >
                                             <Plus size={18} />
                                         </button>

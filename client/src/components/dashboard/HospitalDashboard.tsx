@@ -5,7 +5,7 @@ import {
     Activity, Droplets, UserPlus, ClipboardList, TrendingUp, AlertTriangle,
     ArrowRight, Loader2, QrCode, X, Search, Heart, ShieldCheck, CheckCircle2,
     Database, Save, Plus, Minus, Settings, ShoppingBag, Globe, Zap, MessageCircle,
-    MapPin, User, Clock, Calendar
+    MapPin, User, Clock, Calendar, MessageSquare
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -474,13 +474,37 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                                                     <div className="flex-1 space-y-6 w-full text-left">
                                                         <div className="space-y-4">
                                                             <div className="flex flex-wrap items-center gap-4">
-                                                                <h4 className="font-black text-gray-900 text-2xl tracking-tight leading-tight">{req.hospitalName || "Public Drive"}</h4>
-                                                                {!req.isMine && <span className="text-[9px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 px-2 py-1 rounded-md">External</span>}
+                                                                <h4 className="font-black text-gray-900 text-2xl tracking-tight leading-tight uppercase">{req.bloodType} Emergency Support</h4>
+                                                                {req.urgency === 'Critical' && (
+                                                                    <span className="px-3 py-1 bg-red-100 text-[#FF1744] rounded-full text-[8px] font-black uppercase tracking-widest animate-pulse border border-red-200">
+                                                                        Critical Urgency
+                                                                    </span>
+                                                                )}
                                                             </div>
-                                                            <div className="flex items-center gap-2.5 bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100 w-fit">
-                                                                <MapPin size={16} className="text-red-400" />
-                                                                <span className="text-xs font-black uppercase tracking-widest text-gray-600">{req.location?.address?.split(',')[0]}</span>
+                                                            <div className="flex flex-wrap gap-4">
+                                                                <div className="flex items-center gap-2.5 bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100 w-fit">
+                                                                    <MapPin size={14} className="text-red-400" />
+                                                                    <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 truncate max-w-[150px]">{req.location?.address?.split(',')[0]}</span>
+                                                                </div>
+                                                                {req.patientName && (
+                                                                    <div className="flex items-center gap-2.5 bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100 w-fit">
+                                                                        <User size={14} className="text-blue-500" />
+                                                                        <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">Patient: {req.patientName}</span>
+                                                                    </div>
+                                                                )}
                                                             </div>
+
+                                                            {/* (NEW) Case Description */}
+                                                            {(req.description || req.aiReasoning) && (
+                                                                <div className="bg-red-50/30 p-4 rounded-3xl border border-red-100/50 mt-2">
+                                                                    <p className="text-[9px] font-black text-red-400 uppercase tracking-widest mb-1 flex items-center gap-2 italic">
+                                                                        <MessageSquare size={10} /> Clinical Brief
+                                                                    </p>
+                                                                    <p className="text-xs font-bold text-gray-600 leading-relaxed italic">
+                                                                        "{req.description || req.aiReasoning}"
+                                                                    </p>
+                                                                </div>
+                                                            )}
                                                         </div>
 
                                                         <div className="space-y-4 bg-gray-50/50 p-6 rounded-[32px] border border-gray-100/50">
@@ -744,13 +768,13 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="max-w-xl w-full">
                             <Card className="bg-white rounded-[60px] border-none shadow-2xl overflow-hidden">
                                 <CardHeader className="p-12 pb-0 flex flex-row items-center justify-between">
-                                    <div className="flex items-center gap-6">
+                                            <div className="flex items-center gap-6">
                                         <div className="w-16 h-16 bg-red-50 text-[#FF1744] rounded-[24px] flex items-center justify-center">
                                             <ShieldCheck size={32} />
                                         </div>
                                         <div className="text-left">
-                                            <h3 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Donation Verification</h3>
-                                            <p className="text-sm font-bold text-gray-400">Authorize donation exchange.</p>
+                                            <h3 className="text-3xl font-black text-gray-900 tracking-tighter uppercase leading-none">Security OTP</h3>
+                                            <p className="text-sm font-bold text-gray-400">Generate secure verification code.</p>
                                         </div>
                                     </div>
                                     <button onClick={() => setSelectedDonation(null)} className="p-4 bg-gray-50 rounded-3xl"><X size={24} /></button>
@@ -760,8 +784,8 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                                         {!qrToken ? (
                                             <>
                                                 <QrCode size={80} className="mx-auto text-gray-200 mt-4" />
-                                                <p className="text-lg font-bold text-gray-500 max-w-[320px] mx-auto leading-relaxed">
-                                                    Generate verification QR for donor to scan.
+                                                <p className="text-base font-bold text-gray-500 max-w-[320px] mx-auto leading-relaxed">
+                                                    Generate a 6-digit verification OTP for the donor/receiver to enter in their dashboard to authorize this handover.
                                                 </p>
                                                 <Button
                                                     onClick={() => handleGenerateCode(selectedDonation._id)}
@@ -771,7 +795,7 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                                                     {generatingQr ? <Loader2 className="animate-spin" /> : "Verify Donor"}
                                                 </Button>
                                                 <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.2em] text-center">
-                                                    Refresh New Code? Click verify again.
+                                                    Need new OTP? Refresh and generate again.
                                                 </p>
                                             </>
                                         ) : (
@@ -785,8 +809,8 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                                                     </div>
                                                 </div>
                                                 <div className="space-y-3">
-                                                    <p className="text-2xl font-black text-gray-900 tracking-tight">System Ready</p>
-                                                    <p className="text-sm font-bold text-gray-400">Ask Donor to scan code and confirm donation amount.</p>
+                                                    <p className="text-2xl font-black text-gray-900 tracking-tight">OTP System Ready</p>
+                                                    <p className="text-sm font-bold text-gray-400">Provide this code to the donor. They must enter it in their dashboard to finalize the donation.</p>
                                                 </div>
                                                 <button onClick={() => setQrToken(null)} className="text-[10px] font-black text-[#FF1744] uppercase tracking-widest hover:underline">
                                                     Refresh Protocol?

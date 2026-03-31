@@ -3,7 +3,7 @@ import { User as UserType } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
     Plus, Search, Clock, CheckCircle2, AlertCircle,
-    ArrowRight, Droplet, MessageCircle, Loader2, ClipboardList, QrCode, X, Heart, Navigation, Zap, Hospital, Activity
+    ArrowRight, Droplet, MessageCircle, Loader2, ClipboardList, QrCode, X, Heart, Navigation, Zap, Hospital, Activity, MessageSquare, Trash2, User
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -73,7 +73,7 @@ export const ReceiverDashboard = ({ user }: { user: UserType }) => {
     return (
         <div className="max-w-[1600px] mx-auto space-y-12 pb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000">
 
-// MissionChat removed in favor of CommunicationsCenter
+
 
             {/* Premium Header Tabs */}
             <div className="px-4">
@@ -93,6 +93,8 @@ export const ReceiverDashboard = ({ user }: { user: UserType }) => {
                                     : "text-gray-400 hover:text-gray-900 hover:bg-white/80"
                             )}
                         >
+                            {tab.icon && <tab.icon size={16} />}
+                            {tab.label}
                         </button>
                     ))}
 
@@ -184,24 +186,46 @@ export const ReceiverDashboard = ({ user }: { user: UserType }) => {
                                                                 {req.status === 'Fulfilled' ? 'Mission Succeeded' : 'Broadcasting Network'}
                                                             </span>
                                                         </div>
-                                                        <div className="flex items-center gap-2.5 bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100 w-fit">
-                                                            <Hospital size={16} className="text-[#FF1744]" />
-                                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">{req.hospitalName}</span>
+                                                        <div className="flex flex-wrap gap-4">
+                                                            <div className="flex items-center gap-2.5 bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100 w-fit">
+                                                                <Hospital size={16} className="text-[#FF1744]" />
+                                                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-600 truncate max-w-[150px]">{req.hospitalName}</span>
+                                                            </div>
+                                                            {req.patientName && (
+                                                                <div className="flex items-center gap-2.5 bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100 w-fit">
+                                                                    <User size={16} className="text-blue-500" />
+                                                                    <span className="text-[10px] font-black uppercase tracking-widest text-blue-600">Patient: {req.patientName}</span>
+                                                                </div>
+                                                            )}
                                                         </div>
+
+                                                        {/* (NEW) Case Description */}
+                                                        {req.description && (
+                                                            <div className="bg-gray-50/80 p-5 rounded-3xl border border-gray-100/50 mt-2 relative group/note">
+                                                                <div className="absolute -top-2.5 left-6 px-3 py-1 bg-white border border-gray-100 rounded-full shadow-sm">
+                                                                    <p className="text-[8px] font-black text-[#FF1744] uppercase tracking-widest flex items-center gap-2">
+                                                                        <MessageSquare size={10} /> Medical Context
+                                                                    </p>
+                                                                </div>
+                                                                <p className="text-xs font-bold text-gray-600 leading-relaxed italic mt-2">
+                                                                    "{req.description}"
+                                                                </p>
+                                                            </div>
+                                                        )}
 
                                                         {/* Fulfillment Progress */}
                                                         <div className="space-y-4 bg-gray-50/50 p-6 rounded-[32px] border border-gray-100/50">
                                                             <div className="flex justify-between items-end">
                                                                 <div className="space-y-1 text-left">
-                                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] leading-none">Response Status</p>
+                                                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] leading-none">Donation Track</p>
                                                                     <p className="text-lg font-black text-gray-900 tracking-tight">
                                                                         {req.status === 'Fulfilled'
-                                                                            ? "Mission Succeeded"
+                                                                            ? "Mission Complete"
                                                                             : req.handoverInitiated
-                                                                                ? "Ready for Collection"
+                                                                                ? "Ready for Pickup"
                                                                                 : req.collectedUnits >= req.units
-                                                                                    ? "Awaiting Handover"
-                                                                                    : "Gathering Resources"}
+                                                                                    ? "Awaiting Hospital"
+                                                                                    : "Live: Seeking Donors"}
                                                                     </p>
                                                                 </div>
                                                                 <div className="text-right">
@@ -225,10 +249,11 @@ export const ReceiverDashboard = ({ user }: { user: UserType }) => {
                                                         <Button
                                                             onClick={() => handleDeleteRequest(req._id)}
                                                             variant="ghost"
-                                                            className="h-20 w-24 bg-red-50 text-red-500 hover:bg-red-100 rounded-[32px] flex items-center justify-center transition-all"
-                                                            title="Delete Request"
+                                                            className="h-20 px-8 bg-red-50 text-red-500 hover:bg-red-100 rounded-[32px] flex items-center justify-center gap-3 transition-all shrink-0 group/delete border border-red-100/50"
+                                                            title="Cancel Request"
                                                         >
-                                                            <X size={24} />
+                                                            <Trash2 size={24} className="group-hover/delete:scale-110 transition-transform" />
+                                                            <span className="font-black text-[10px] uppercase tracking-widest">Cancel Request</span>
                                                         </Button>
                                                     )}
                                                     {req.status !== 'Fulfilled' && req.handoverInitiated ? (
@@ -283,15 +308,15 @@ export const ReceiverDashboard = ({ user }: { user: UserType }) => {
                     <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
                         <Card className="max-w-md w-full bg-white rounded-[60px] border-none shadow-2xl animate-in zoom-in-95 overflow-hidden">
                             <CardHeader className="p-12 pb-0 flex flex-row items-center justify-between">
-                                <div className="space-y-1">
-                                    <h3 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Collected Blood?</h3>
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Confirm Transaction</p>
-                                </div>
+                                <div className="space-y-1 text-left">
+                                     <h3 className="text-3xl font-black text-gray-900 tracking-tighter uppercase leading-none">Security OTP</h3>
+                                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Final Handover Step</p>
+                                 </div>
                                 <button onClick={() => setVerifyingMission(null)} className="p-4 bg-gray-50 rounded-3xl"><X size={24} /></button>
                             </CardHeader>
                             <CardContent className="p-12 space-y-8">
-                                <p className="text-lg font-bold text-gray-500 text-center leading-relaxed">
-                                    Enter the 6-digit code provided by the hospital after you receive the blood units.
+                                <p className="text-base font-bold text-gray-500 text-center leading-relaxed italic border-l-4 border-red-500 pl-4 bg-red-50/30 py-4 rounded-r-2xl">
+                                    Enter the 6-digit secure code provided by the hospital after you receive the blood units. This marks the mission as complete.
                                 </p>
                                 <form onSubmit={handleVerifyMission} className="space-y-10">
                                     <input

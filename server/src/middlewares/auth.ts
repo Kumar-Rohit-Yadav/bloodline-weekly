@@ -38,6 +38,10 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
         req.user = await User.findById(decoded.id);
 
+        if (!req.user) {
+            return res.status(401).json({ success: false, error: 'User not found' });
+        }
+
         next();
     } catch (error) {
         return res.status(401).json({ success: false, error: 'Not authorized to access this route' });

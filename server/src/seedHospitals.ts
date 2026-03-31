@@ -60,7 +60,7 @@ const seedData = async () => {
         await VerifiedHospital.deleteMany({});
         await User.deleteMany({});
 
-        console.log(`Seeding ${hospitals.length} Hospitals...`);
+        console.log(`Seeding ${hospitals.length} Verified Hospitals Master List...`);
         await VerifiedHospital.insertMany(hospitals);
 
         console.log('Creating System Admin...');
@@ -73,8 +73,98 @@ const seedData = async () => {
             isEmailVerified: true
         });
 
-        console.log(`Success: ${hospitals.length} Hospitals & System Admin Created!`);
+        const hospitalsToCreate = [
+            {
+                name: "T.U. Teaching Hospital",
+                email: "tuth@hospital.com",
+                password: "password123",
+                role: "hospital",
+                isVerified: true,
+                isEmailVerified: true,
+                facilityName: "T.U. Teaching Hospital (TUTH)",
+                facilityAddress: "Maharajgunj, Kathmandu",
+                location: { type: "Point", coordinates: [85.3301, 27.7345] },
+                inventory: [
+                    { bloodType: 'A+', units: 15, status: 'Normal' },
+                    { bloodType: 'O+', units: 8, status: 'Low' },
+                    { bloodType: 'AB-', units: 2, status: 'Critical' }
+                ]
+            },
+            {
+                name: "Bir Hospital",
+                email: "bir@hospital.com",
+                password: "password123",
+                role: "hospital",
+                isVerified: true,
+                isEmailVerified: true,
+                facilityName: "Bir Hospital",
+                facilityAddress: "Kanti Path, Kathmandu",
+                location: { type: "Point", coordinates: [85.3134, 27.7056] },
+                inventory: [
+                    { bloodType: 'B+', units: 20, status: 'High' },
+                    { bloodType: 'O-', units: 5, status: 'Low' }
+                ]
+            },
+            {
+                name: "Nepal Mediciti",
+                email: "mediciti@hospital.com",
+                password: "password123",
+                role: "hospital",
+                isVerified: true,
+                isEmailVerified: true,
+                facilityName: "Nepal Mediciti Hospital",
+                facilityAddress: "Bhaisepati, Lalitpur",
+                location: { type: "Point", coordinates: [85.3015, 27.6450] },
+                inventory: [
+                    { bloodType: 'A-', units: 12, status: 'Normal' },
+                    { bloodType: 'AB+', units: 10, status: 'Normal' }
+                ]
+            }
+        ];
+
+        console.log('Creating Sample Hospital Users...');
+        for (const h of hospitalsToCreate) {
+            await User.create(h);
+        }
+
+        console.log('Creating Sample Donors...');
+        await User.create({
+            name: "Premium Donor",
+            email: "donor@bloodline.com",
+            password: "password123",
+            role: "donor",
+            bloodType: "A+",
+            isVerified: true,
+            isEmailVerified: true,
+            location: { type: "Point", coordinates: [85.3311, 27.7355] } // Near TUTH
+        });
+
+        await User.create({
+            name: "Universal Donor",
+            email: "universal@bloodline.com",
+            password: "password123",
+            role: "donor",
+            bloodType: "O-",
+            isVerified: true,
+            isEmailVerified: true,
+            location: { type: "Point", coordinates: [85.3144, 27.7066] } // Near Bir
+        });
+
+        await User.create({
+            name: "Verified Receiver",
+            email: "receiver@bloodline.com",
+            password: "password123",
+            role: "receiver",
+            isVerified: true,
+            isEmailVerified: true,
+            location: { type: "Point", coordinates: [85.3200, 27.6950] } // Near Norvic
+        });
+
+        console.log(`Success: ${hospitals.length} Master List Items & ${hospitalsToCreate.length} Operational Hospital Users Created!`);
         console.log('Admin Email: admin@bloodline.com | Password: password123');
+        console.log('Hospital 1: tuth@hospital.com | Password: password123');
+        console.log('Donor 1: donor@bloodline.com | Password: password123');
+        console.log('Receiver 1: receiver@bloodline.com | Password: password123');
         process.exit(0);
     } catch (error) {
         console.error('Error seeding data:', error);

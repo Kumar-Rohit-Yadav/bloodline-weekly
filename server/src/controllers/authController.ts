@@ -107,25 +107,40 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         // Check for user
         const user = await User.findOne({ email }).select('+password');
 
+        console.log('------------------------------------------------');
+        console.log('👔 LOGIN ATTEMPT:');
+        console.log(`📧 Email: '${email}'`);
+        console.log(`👤 User Found: ${!!user}`);
+
         if (!user) {
+            console.log('❌ Result: User not found in database.');
+            console.log('------------------------------------------------');
             return res.status(401).json({ success: false, error: 'Invalid credentials' });
         }
 
         // Check if email is verified
         if (!user.isEmailVerified) {
+            console.log('⚠️ Result: Email not verified.');
+            console.log('------------------------------------------------');
             return res.status(403).json({
                 success: false,
-                error: 'Please verify your email before logging in. Check your email for the OTP verification link.',
+                error: 'Please verify your email before logging in.',
                 needsVerification: true
             });
         }
 
         // Check if password matches
         const isMatch = await user.matchPassword(password);
+        console.log(`🔑 Password Match: ${isMatch}`);
 
         if (!isMatch) {
+            console.log('❌ Result: Password mismatch.');
+            console.log('------------------------------------------------');
             return res.status(401).json({ success: false, error: 'Invalid credentials' });
         }
+
+        console.log('✅ Result: Authentication success.');
+        console.log('------------------------------------------------');
 
         sendTokenResponse(user, 200, res);
     } catch (error: any) {

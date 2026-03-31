@@ -5,7 +5,7 @@ import {
     Activity, Droplets, UserPlus, ClipboardList, TrendingUp, AlertTriangle,
     ArrowRight, Loader2, QrCode, X, Search, Heart, ShieldCheck, CheckCircle2,
     Database, Save, Plus, Minus, Settings, ShoppingBag, Globe, Zap, MessageCircle,
-    MapPin, User, Clock, Calendar, MessageSquare
+    MapPin, User, Clock, Calendar, MessageSquare, Trash2
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -530,7 +530,7 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                                                         Find Matches <Search size={16} className="ml-2" />
                                                     </Button>
 
-                                                    {req.collectedUnits < req.units && !req.isMine && (
+                                                    {req.collectedUnits < req.units && (!req.isMine || !req.isPublicDrive) && (
                                                         <Button
                                                             onClick={() => { setSelectedDonation(req); setIsDirectFulfilling(true); setDirectFulfillUnits(1); }}
                                                             className="h-16 px-6 bg-amber-50 text-amber-600 rounded-[24px] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-amber-100 transition-all flex-1 min-w-[140px]"
@@ -548,13 +548,15 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                                                         </Button>
                                                     )}
 
-                                                    {req.isMine && req.collectedUnits === 0 && (
+                                                    {req.isMine && (req.collectedUnits === 0) && (
                                                         <Button
                                                             onClick={() => handleDeleteRequest(req._id)}
                                                             variant="ghost"
-                                                            className="h-16 w-16 bg-red-50 text-red-500 hover:bg-red-100 rounded-[24px] flex items-center justify-center transition-all shrink-0"
+                                                            className="h-16 px-6 bg-red-50 text-red-500 hover:bg-red-100 rounded-[24px] flex items-center justify-center gap-3 transition-all shrink-0 group/delete border border-red-100/50"
+                                                            title="Cancel Request"
                                                         >
-                                                            <X size={20} />
+                                                            <Trash2 size={20} className="group-hover/delete:scale-110 transition-transform" />
+                                                            <span className="font-black text-[10px] uppercase tracking-widest">Cancel</span>
                                                         </Button>
                                                     )}
                                                 </div>
@@ -731,14 +733,16 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                                                 onChange={(e) => {
                                                     const val = Math.max(1, parseInt(e.target.value) || 1);
                                                     const remaining = selectedDonation.units - (selectedDonation.collectedUnits || 0);
-                                                    setDirectFulfillUnits(Math.min(remaining, val));
+                                                    const bankStock = stock.find((s: any) => s.bloodType === selectedDonation.bloodType)?.units || 0;
+                                                    setDirectFulfillUnits(Math.min(val, remaining, bankStock));
                                                 }}
                                                 className="flex-1 h-14 bg-gray-50 border-none rounded-2xl text-center text-2xl font-black outline-none text-[#FF1744]"
                                             />
                                             <button
                                                 onClick={() => {
                                                     const remaining = selectedDonation.units - (selectedDonation.collectedUnits || 0);
-                                                    setDirectFulfillUnits(Math.min(remaining, directFulfillUnits + 1));
+                                                    const bankStock = stock.find((s: any) => s.bloodType === selectedDonation.bloodType)?.units || 0;
+                                                    setDirectFulfillUnits(Math.min(directFulfillUnits + 1, remaining, bankStock));
                                                 }}
                                                 className="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center hover:bg-gray-100"
                                             >

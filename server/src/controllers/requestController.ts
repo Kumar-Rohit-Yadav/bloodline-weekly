@@ -241,7 +241,7 @@ export const fulfillRequestDirectly = async (req: AuthRequest, res: Response) =>
         }
 
         // Prevent Creator from fulfilling their own PUBLIC DRIVE directly (per user requirement)
-        if (request.requester.toString() === req.user._id.toString()) {
+        if (request.isPublicDrive && request.requester.toString() === req.user._id.toString()) {
             return res.status(403).json({ success: false, error: "You cannot directly fulfill your own public drive. Please wait for external donations." });
         }
 

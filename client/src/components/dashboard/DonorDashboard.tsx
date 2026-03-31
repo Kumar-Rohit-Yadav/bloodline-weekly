@@ -24,15 +24,6 @@ export const DonorDashboard = ({ user }: { user: UserType }) => {
     const [verifyUnits, setVerifyUnits] = useState(1);
     const [isSubmittingCode, setIsSubmittingCode] = useState(false);
     const [donationCount, setDonationCount] = useState(0);
-    const [appointments, setAppointments] = useState<any[]>([]);
-    const [showBooking, setShowBooking] = useState(false);
-    const [hospitals, setHospitals] = useState<any[]>([]);
-    const [bookingData, setBookingData] = useState({
-        hospitalId: "",
-        bloodType: user?.bloodType || "O+",
-        scheduledAt: "",
-        notes: ""
-    });
     const [pendingCount, setPendingCount] = useState(0);
     const { socket } = useSocket();
     const navigate = useNavigate();
@@ -66,24 +57,6 @@ export const DonorDashboard = ({ user }: { user: UserType }) => {
         }
     };
 
-    const fetchAppointments = async () => {
-        try {
-            const res = await api.get('/appointments/me');
-            setAppointments(res.data.data);
-        } catch (error) {
-            console.error("Failed to fetch appointments");
-        }
-    };
-
-    const fetchHospitals = async () => {
-        try {
-            const res = await api.get('/hospital/public-inventory');
-            setHospitals(res.data.data);
-        } catch (error) {
-            console.error("Failed to fetch hospitals");
-        }
-    };
-
     const fetchPendingCount = async () => {
         try {
             const res = await api.get('/connections/pending');
@@ -95,8 +68,6 @@ export const DonorDashboard = ({ user }: { user: UserType }) => {
 
     useEffect(() => {
         fetchOpportunities();
-        fetchAppointments();
-        fetchHospitals();
         fetchPendingCount();
 
         if (socket) {
@@ -149,17 +120,7 @@ export const DonorDashboard = ({ user }: { user: UserType }) => {
         }
     };
 
-    const handleDeleteAppointment = async (appointmentId: string) => {
-        if (!window.confirm("Are you sure you want to cancel this appointment?")) return;
 
-        try {
-            await api.delete(`/appointments/${appointmentId}`);
-            toast.success("Appointment cancelled successfully.");
-            fetchAppointments();
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || "Failed to cancel appointment.");
-        }
-    };
 
     const handleVerifyCompletion = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -199,19 +160,7 @@ export const DonorDashboard = ({ user }: { user: UserType }) => {
         return (R * c).toFixed(1);
     };
 
-    const handleCreateAppointment = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const res = await api.post('/appointments', bookingData);
-            if (res.data.success) {
-                toast.success("Appointment booked! Waiting for hospital confirmation.");
-                setShowBooking(false);
-                fetchAppointments();
-            }
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || "Booking failed");
-        }
-    };
+
 
     return (
         <div className="max-w-[1600px] mx-auto space-y-12 pb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -266,104 +215,34 @@ export const DonorDashboard = ({ user }: { user: UserType }) => {
                 </div>
             </div>
 
-            {/* Appointment Tracker */}
-            <div className="px-4">
-                <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter flex items-center gap-4">
-                        <div className="w-2 h-8 bg-[#FF1744] rounded-full" />
-                        Upcoming Appointments
-                    </h2>
+            {/* Opportunity Board */}
+            <div className="px-4 space-y-12 sm:space-y-16">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8">
+                    <div className="space-y-3 text-left">
+                        <div className="flex items-center gap-4">
+                            <div className="w-2 h-8 bg-[#FF1744] rounded-full" />
+                            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tighter uppercase">
+                                Blood Requirements Radar
+                            </h2>
+                        </div>
+                        <p className="text-gray-400 font-bold text-base sm:text-lg">Scan real-time blood needs and urgent missions in your local area.</p>
+                    </div>
                     <div className="flex gap-4">
-                        <Button
+                        <Button 
                             onClick={() => navigate('/dashboard/messages')}
-                            className="bg-white text-gray-900 border-2 border-gray-100 hover:border-red-100 px-6 h-14 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl flex items-center gap-3 transition-all relative"
+                            className="bg-white text-gray-900 border-2 border-gray-100 px-8 h-16 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl flex items-center gap-3 relative hover:border-red-100 transition-all"
                         >
-                            <MessageCircle size={16} className="text-[#FF1744]" /> Inbox
+                            <MessageSquare size={18} className="text-[#FF1744]" /> Inbox
                             {pendingCount > 0 && (
-                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FF1744] text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white animate-bounce">
+                                <span className="absolute -top-2 -right-2 w-6 h-6 bg-[#FF1744] text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white animate-bounce">
                                     {pendingCount}
                                 </span>
                             )}
                         </Button>
-                        <Button
-                            onClick={() => setShowBooking(true)}
-                            className="bg-gray-900 text-white hover:bg-black px-6 h-14 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl flex items-center gap-3"
-                        >
-                            <Calendar size={16} /> Book Appointment
+                        <Button onClick={() => navigate('/dashboard/book-appointment')} className="bg-gray-900 text-white hover:bg-black px-8 h-16 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl flex items-center gap-3">
+                            <Calendar size={18} /> Book Appointment
                         </Button>
                     </div>
-                </div>
-
-                {appointments.length > 0 ? (
-                    <div className="flex gap-6 overflow-x-auto pb-6 no-scrollbar">
-                        {appointments.map((apt) => (
-                            <div key={apt._id} className="min-w-[320px] bg-white rounded-[40px] p-8 border border-gray-100 shadow-sm relative overflow-hidden group">
-                                <div className={cn(
-                                    "absolute top-0 right-0 w-24 h-24 blur-[60px] opacity-10",
-                                    apt.status === 'Confirmed' ? "bg-green-500" : "bg-amber-500"
-                                )} />
-                                <div className="space-y-6">
-                                    <div className="flex items-start justify-between">
-                                        <div className="space-y-1">
-                                            <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Hospital</p>
-                                            <h4 className="text-xl font-black text-gray-900 uppercase tracking-tight">{apt.hospital.facilityName}</h4>
-                                        </div>
-                                        <div className="w-12 h-12 bg-red-50 text-[#FF1744] rounded-2xl flex items-center justify-center font-black">
-                                            {apt.bloodType}
-                                        </div>
-                                    </div>
-                                    {apt.status === 'Pending' && (
-                                        <button
-                                            onClick={() => handleDeleteAppointment(apt._id)}
-                                            className="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 transition-colors"
-                                            title="Cancel Appointment"
-                                        >
-                                            <X size={16} />
-                                        </button>
-                                    )}
-                                    <div className="flex items-center gap-6 justify-between pt-4 border-t border-gray-50">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
-                                                <Clock size={18} />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] font-black text-gray-900">{new Date(apt.scheduledAt).toLocaleDateString()}</p>
-                                                <p className="text-[9px] font-bold text-gray-400">{new Date(apt.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                            </div>
-                                        </div>
-                                        <span className={cn(
-                                            "px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border",
-                                            apt.status === 'Confirmed' ? "bg-green-50 text-green-600 border-green-100" : "bg-amber-50 text-amber-600 border-amber-100"
-                                        )}>
-                                            {apt.status}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="py-16 bg-gray-50/50 rounded-[40px] border-2 border-dashed border-gray-100 flex flex-col items-center gap-4 text-center">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-gray-300 shadow-sm">
-                            <Calendar size={32} />
-                        </div>
-                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest">No upcoming donations scheduled</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Opportunity Board */}
-            <div className="px-4 space-y-8 sm:space-y-12">
-                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-                    <div className="space-y-2 text-left">
-                        <h2 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tighter uppercase flex items-center gap-4">
-                            Blood Requirements
-                        </h2>
-                        <p className="text-gray-400 font-bold text-sm sm:text-base">Nearby blood needs and donation drives.</p>
-                    </div>
-                    <Button variant="ghost" className="hidden sm:inline-flex bg-white hover:bg-gray-50 border border-gray-100 px-8 h-14 rounded-2xl font-black text-xs uppercase tracking-widest text-gray-900 shadow-sm">
-                        Browse Network <Globe size={16} className="ml-3 text-[#FF1744]" />
-                    </Button>
                 </div>
 
                 {loading ? (
@@ -665,65 +544,6 @@ export const DonorDashboard = ({ user }: { user: UserType }) => {
                 </div>
             )}
 
-            {/* Pledge Amount Modal REMOVED - Streamlined flow */}
-
-            {/* Appointment Booking Modal */}
-            {showBooking && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="max-w-md w-full">
-                        <Card className="bg-white rounded-[60px] border-none shadow-2xl overflow-hidden">
-                            <CardHeader className="p-12 pb-0 flex flex-row items-center justify-between">
-                                <div className="space-y-1 text-left">
-                                    <h3 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Book Donation</h3>
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Schedule a visit</p>
-                                </div>
-                                <button onClick={() => setShowBooking(false)} className="p-4 bg-gray-50 rounded-3xl"><X size={24} /></button>
-                            </CardHeader>
-                            <CardContent className="p-12 space-y-8">
-                                <form onSubmit={handleCreateAppointment} className="space-y-8">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 block text-left">Select Hospital</label>
-                                        <select
-                                            required
-                                            value={bookingData.hospitalId}
-                                            onChange={(e) => setBookingData({ ...bookingData, hospitalId: e.target.value })}
-                                            className="w-full h-18 bg-gray-50 border-none rounded-[24px] px-6 text-sm font-bold outline-none"
-                                        >
-                                            <option value="">Choose Hospital...</option>
-                                            {hospitals.map(h => (
-                                                <option key={h._id} value={h._id}>{h.facilityName}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 block text-left">Blood Type</label>
-                                        <select
-                                            value={bookingData.bloodType}
-                                            onChange={(e) => setBookingData({ ...bookingData, bloodType: e.target.value })}
-                                            className="w-full h-18 bg-gray-50 border-none rounded-[24px] px-6 text-sm font-bold outline-none"
-                                        >
-                                            {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(t => <option key={t} value={t}>{t}</option>)}
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 block text-left">Date & Time</label>
-                                        <input
-                                            required
-                                            type="datetime-local"
-                                            value={bookingData.scheduledAt}
-                                            onChange={(e) => setBookingData({ ...bookingData, scheduledAt: e.target.value })}
-                                            className="w-full h-18 bg-gray-50 border-none rounded-[24px] px-6 text-sm font-bold outline-none"
-                                        />
-                                    </div>
-                                    <Button type="submit" className="w-full h-20 bg-[#FF1744] hover:bg-[#D50000] text-white rounded-[32px] font-black text-xs uppercase tracking-widest shadow-2xl shadow-red-200">
-                                        Confirm Reservation
-                                    </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                </div>
-            )}
         </div>
     );
 };

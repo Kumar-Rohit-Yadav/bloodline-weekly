@@ -153,23 +153,15 @@ export default function CreateRequestPage() {
     const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 
     return (
-        <div className="min-h-screen bg-[#FDFDFD] py-20 px-4">
+        <div className="py-20 px-4">
             <div className="max-w-3xl mx-auto space-y-12">
                 <div className="relative text-center space-y-4">
-                    <Button
-                        onClick={() => navigate('/dashboard')}
-                        variant="ghost"
-                        className="absolute left-0 top-0 bg-gray-100 text-gray-500 hover:bg-gray-200 px-6 h-12 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hidden lg:flex items-center gap-2"
-                    >
-                        <ArrowLeft size={16} />
-                        Back
-                    </Button>
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 rounded-2xl text-[#FF1744] font-black text-xs uppercase tracking-[0.2em] mb-4">
                         <Droplet size={14} className="fill-current" />
                         Blood Request Center
                     </div>
-                    <h1 className="text-5xl font-black text-gray-900 tracking-tighter">Create a New <span className="text-[#FF1744]">Request</span></h1>
-                    <p className="text-gray-500 font-medium text-lg">Your request will be matched with available donors immediately.</p>
+                    <h1 className="text-5xl font-black text-gray-900 tracking-tighter uppercase leading-none">Broadcast <span className="text-[#FF1744]">Emergency Request</span></h1>
+                    <p className="text-gray-500 font-medium text-lg italic">"Connecting life-critical needs with immediate donor networks."</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-8">

@@ -11,6 +11,12 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import CommunicationsCenter from './pages/CommunicationsCenter';
 import ManageInventoryPage from './pages/ManageInventoryPage';
 import RequestDonationPage from './pages/RequestDonationPage';
+import ActivityHistoryPage from './pages/ActivityHistoryPage';
+import BloodBankExplorerPage from './pages/BloodBankExplorerPage';
+import BookAppointmentPage from './pages/BookAppointmentPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
+import RequestManagementPage from './pages/admin/RequestManagementPage';
+import ProfileReviewPage from './pages/admin/ProfileReviewPage';
 import { useAuth } from './context/AuthContext';
 import { Toaster } from 'sonner';
 import { DashboardLayout } from './components/layout/DashboardLayout';
@@ -59,6 +65,13 @@ function App() {
                     <Route path="messages" element={<CommunicationsCenter />} />
                     <Route path="inventory" element={<ManageInventoryPage />} />
                     <Route path="request-blood" element={<RequestDonationPage />} />
+                    <Route path="explorer" element={<BloodBankExplorerPage />} />
+                    <Route path="history" element={<ActivityHistoryPage />} />
+                    <Route path="book-appointment" element={<BookAppointmentPage />} />
+                    {/* Admin Management Routes */}
+                    <Route path="users" element={<UserManagementPage />} />
+                    <Route path="requests" element={<RequestManagementPage />} />
+                    <Route path="reviews" element={<ProfileReviewPage />} />
                 </Route>
                 <Route path="/complete-profile" element={<PrivateRoute><CompleteProfilePage /></PrivateRoute>} />
 

@@ -31,30 +31,81 @@ export const DashboardNavbar = () => {
                     {/* Integrated Hospital Navigation */}
                     {user.role === 'hospital' && (
                         <div className="hidden lg:flex items-center gap-1 p-1 bg-gray-50/50 rounded-2xl border border-gray-100">
-                            <button 
-                                onClick={() => navigate('/dashboard')}
-                                className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${location.pathname === '/dashboard' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100/50'}`}
-                            >
-                                Dashboard
-                            </button>
-                            <button 
-                                onClick={() => navigate('/dashboard/inventory')}
-                                className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${location.pathname === '/dashboard/inventory' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100/50'}`}
-                            >
-                                Blood Inventory
-                            </button>
-                            <button 
-                                onClick={() => navigate('/dashboard/request-blood')}
-                                className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${location.pathname === '/dashboard/request-blood' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100/50'}`}
-                            >
-                                Request Blood
-                            </button>
-                            <button 
-                                onClick={() => navigate('/dashboard/messages')}
-                                className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${location.pathname === '/dashboard/messages' ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100/50'}`}
-                            >
-                                Messages
-                            </button>
+                            {[
+                                { path: '/dashboard', label: 'Dashboard' },
+                                { path: '/dashboard/inventory', label: 'Blood Inventory' },
+                                { path: '/dashboard/request-blood', label: 'Request Blood' },
+                                { path: '/dashboard/messages', label: 'Messages' }
+                            ].map((link) => (
+                                <button 
+                                    key={link.path}
+                                    onClick={() => navigate(link.path)}
+                                    className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${location.pathname === link.path ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100/50'}`}
+                                >
+                                    {link.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Integrated Receiver Navigation */}
+                    {user.role === 'receiver' && (
+                        <div className="hidden lg:flex items-center gap-1 p-1 bg-gray-50/50 rounded-2xl border border-gray-100">
+                            {[
+                                { path: '/dashboard', label: 'Dashboard' },
+                                { path: '/dashboard/create-request', label: 'Broadcast Emergency' },
+                                { path: '/dashboard/explorer', label: 'Blood Banks' },
+                                { path: '/dashboard/history', label: 'Activity History' },
+                                { path: '/dashboard/messages', label: 'Messages' }
+                            ].map((link) => (
+                                <button 
+                                    key={link.path}
+                                    onClick={() => navigate(link.path)}
+                                    className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${location.pathname === link.path ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100/50'}`}
+                                >
+                                    {link.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Integrated Donor Navigation */}
+                    {user.role === 'donor' && (
+                        <div className="hidden lg:flex items-center gap-1 p-1 bg-gray-50/50 rounded-2xl border border-gray-100">
+                            {[
+                                { path: '/dashboard', label: 'Dashboard' },
+                                { path: '/dashboard/book-appointment', label: 'Book Appointment' },
+                                { path: '/dashboard/history', label: 'Activity History' },
+                                { path: '/dashboard/messages', label: 'Messages' }
+                            ].map((link) => (
+                                <button 
+                                    key={link.path}
+                                    onClick={() => navigate(link.path)}
+                                    className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${location.pathname === link.path ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100/50'}`}
+                                >
+                                    {link.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Integrated Admin Navigation */}
+                    {user.role === 'admin' && (
+                        <div className="hidden lg:flex items-center gap-1 p-1 bg-gray-50/50 rounded-2xl border border-gray-100">
+                            {[
+                                { path: '/dashboard', label: 'Dashboard' },
+                                { path: '/dashboard/users', label: 'Users' },
+                                { path: '/dashboard/requests', label: 'Requests' },
+                                { path: '/dashboard/reviews', label: 'Profile Reviews' }
+                            ].map((link) => (
+                                <button 
+                                    key={link.path}
+                                    onClick={() => navigate(link.path)}
+                                    className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${location.pathname === link.path ? 'bg-white text-gray-900 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-900 hover:bg-gray-100/50'}`}
+                                >
+                                    {link.label}
+                                </button>
+                            ))}
                         </div>
                     )}
                 </div>

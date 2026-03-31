@@ -232,7 +232,7 @@ export default function CommunicationsCenter() {
     });
 
     return (
-        <div className="flex h-screen bg-gray-50 overflow-hidden font-sans">
+        <div className="flex h-[calc(100vh-5rem)] sm:h-[calc(100vh-6rem)] bg-gray-50 overflow-hidden font-sans">
             {/* Sidebar: Connection List */}
             <div className={cn(
                 "w-full md:w-[400px] bg-white border-r border-gray-100 flex flex-col transition-all",
@@ -241,10 +241,7 @@ export default function CommunicationsCenter() {
                 <div className="p-8 space-y-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <Link to="/dashboard" className="p-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors shadow-sm">
-                                <ArrowLeft size={20} className="text-gray-400" />
-                            </Link>
-                            <h1 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Inbox</h1>
+                            <h1 className="text-3xl font-black text-gray-900 tracking-tighter uppercase text-left">Inbox</h1>
                         </div>
                         <div className="flex gap-2">
                             {pendingRequests.length > 0 && (

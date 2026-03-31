@@ -9,8 +9,11 @@ import CompleteProfilePage from './pages/CompleteProfilePage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import CommunicationsCenter from './pages/CommunicationsCenter';
+import ManageInventoryPage from './pages/ManageInventoryPage';
+import RequestDonationPage from './pages/RequestDonationPage';
 import { useAuth } from './context/AuthContext';
 import { Toaster } from 'sonner';
+import { DashboardLayout } from './components/layout/DashboardLayout';
 
 // Private Route Guard
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -49,10 +52,14 @@ function App() {
                 <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
                 {/* Protected Dashboard Routes */}
-                <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
-                <Route path="/dashboard/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-                <Route path="/dashboard/create-request" element={<PrivateRoute><CreateRequestPage /></PrivateRoute>} />
-                <Route path="/dashboard/messages" element={<PrivateRoute><CommunicationsCenter /></PrivateRoute>} />
+                <Route path="/dashboard" element={<PrivateRoute><DashboardLayout /></PrivateRoute>}>
+                    <Route index element={<DashboardPage />} />
+                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="create-request" element={<CreateRequestPage />} />
+                    <Route path="messages" element={<CommunicationsCenter />} />
+                    <Route path="inventory" element={<ManageInventoryPage />} />
+                    <Route path="request-blood" element={<RequestDonationPage />} />
+                </Route>
                 <Route path="/complete-profile" element={<PrivateRoute><CompleteProfilePage /></PrivateRoute>} />
 
                 {/* Catch all - Redirect to Home */}

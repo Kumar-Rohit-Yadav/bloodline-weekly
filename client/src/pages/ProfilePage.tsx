@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
     User, Mail, Droplet, MapPin, ShieldCheck,
     Camera, LogOut, Save, Loader2,
-    Activity, ArrowLeft, Navigation,
+    Activity, Navigation,
     Building2, AlertCircle, Phone, CheckCircle2,
     ExternalLink, Calendar, Clock, Lock, Globe
 } from "lucide-react";
@@ -203,14 +203,11 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="max-w-[1200px] mx-auto px-4 py-20 space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-700">
+        <div className="max-w-[1600px] mx-auto px-4 py-12 space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-700">
             {/* Header */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
                 <div className="space-y-4">
                     <div className="flex items-center gap-4 justify-center md:justify-start">
-                        <Link to="/dashboard" className="p-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors shadow-sm">
-                            <ArrowLeft size={20} className="text-gray-400" />
-                        </Link>
                         <h1 className="text-4xl font-black text-gray-900 tracking-tight uppercase">My Profile</h1>
                     </div>
                 </div>

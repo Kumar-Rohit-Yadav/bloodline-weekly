@@ -31,18 +31,6 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
     const [pendingCount, setPendingCount] = useState(0);
     const { socket } = useSocket();
 
-    // Inventory Management State
-    const [isManagingStock, setIsManagingStock] = useState(false);
-    const [editableStock, setEditableStock] = useState<any[]>([]);
-    const [isSavingStock, setIsSavingStock] = useState(false);
-
-    // Public Drive State
-    const [isStartingDrive, setIsStartingDrive] = useState(false);
-    const [driveData, setDriveData] = useState({
-        bloodType: "O+",
-        units: 10,
-        description: "General donation drive to replenish hospital blood bank."
-    });
 
     // Direct Fulfill Logic
     const [isDirectFulfilling, setIsDirectFulfilling] = useState(false);
@@ -60,7 +48,6 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
 
             const inventory = invRes.data.data || [];
             setStock(inventory);
-            setEditableStock(inventory);
 
             const myReqs = myReqRes.data.data || [];
             const nearbyReqs = nearbyRes.data.data || [];
@@ -190,46 +177,6 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
         }
     };
 
-    const handleUpdateStock = async () => {
-        setIsSavingStock(true);
-        try {
-            await api.put('/hospital/inventory', { inventory: editableStock });
-            setStock(editableStock);
-            toast.success("Blood Bank Updated Successfully!");
-            setIsManagingStock(false);
-        } catch (error) {
-            toast.error("Failed to update stock");
-        } finally {
-            setIsSavingStock(false);
-        }
-    };
-
-    const handleStartDrive = async () => {
-        if (!user?.location || !user?.location.coordinates) {
-            return toast.error("Facility location missing. Please update your profile.");
-        }
-
-        try {
-            const res = await api.post('/requests', {
-                bloodType: driveData.bloodType,
-                units: driveData.units,
-                description: driveData.description || `General donation drive for ${user.facilityName} to support local patients and replenish emergency reserves.`,
-                location: user.location,
-                hospitalName: user.facilityName,
-                manualUrgency: 'Normal',
-                isPublicDrive: true
-            });
-
-            if (res.data.success) {
-                toast.success("Public Donation Drive Started!");
-                setIsStartingDrive(false);
-                fetchHospitalData();
-            }
-        } catch (error: any) {
-            const message = error.response?.data?.error || "Failed to start drive";
-            toast.error(message);
-        }
-    };
 
     const handleDirectFulfill = async () => {
         if (!selectedDonation) return;
@@ -314,50 +261,16 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
     return (
         <div className="max-w-[1600px] mx-auto space-y-12 pb-20 animate-in fade-in slide-in-from-bottom-8 duration-1000">
 
-            {/* Main Welcome & Operational Control */}
-            <div className="flex flex-col xl:flex-row items-start justify-between gap-16 pt-14 px-8 text-left">
+            {/* Main Welcome & Facility Info */}
+            <div className="flex flex-col xl:flex-row items-center justify-between gap-16 pt-14 px-8 text-center xl:text-left">
                 <div className="space-y-6 flex-1">
-                    <div className="flex gap-4">
-                        <Button onClick={() => setIsManagingStock(true)} className="h-14 px-8 bg-gray-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:scale-105 transition-all">
-                            <Settings size={16} className="mr-2" /> Manage Stock
-                        </Button>
-                        <Button onClick={() => setIsStartingDrive(true)} className="h-14 px-8 bg-[#FF1744] text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:scale-105 transition-all shadow-red-200">
-                            <Plus size={16} className="mr-2" /> Start Drive
-                        </Button>
-                    </div>
                     <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-gray-900 tracking-tighter leading-[0.85] uppercase">
                         {user?.facilityName || 'Facility Center'}
                     </h1>
-                    <p className="text-lg sm:text-xl font-bold text-gray-400 max-w-2xl leading-relaxed">Precision blood bank management and emergency coordination console.</p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 w-full xl:w-auto">
-                    <Button
-                        onClick={() => navigate('/dashboard/messages')}
-                        className="h-20 px-10 bg-white border-2 border-gray-100 hover:border-red-100 text-gray-900 rounded-[32px] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-gray-100 transition-all flex items-center justify-center gap-4 group relative"
-                    >
-                        <MessageCircle size={18} className="text-[#FF1744]" />
-                        Communications
-                        {pendingCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-6 h-6 bg-[#FF1744] text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white animate-bounce">
-                                {pendingCount}
-                            </span>
-                        )}
-                    </Button>
-                    <Button
-                        onClick={() => setIsManagingStock(true)}
-                        className="h-20 px-10 bg-gray-900 hover:bg-black text-white rounded-[32px] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-gray-200 transition-all flex items-center justify-center gap-4 group"
-                    >
-                        <Database size={18} className="group-hover:scale-110 transition-transform" />
-                        Update Inventory
-                    </Button>
-                    <Button
-                        onClick={() => setIsStartingDrive(true)}
-                        className="h-20 px-10 bg-[#FF1744] hover:bg-[#D50000] text-white rounded-[32px] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-red-200 transition-all flex items-center justify-center gap-4 group"
-                    >
-                        <Globe size={18} className="animate-pulse" />
-                        Launch Drive
-                    </Button>
+                    <p className="text-lg sm:text-xl font-black text-[#FF1744] uppercase tracking-widest max-w-2xl bg-red-50/50 w-fit px-6 py-2 rounded-2xl mx-auto xl:mx-0">
+                        Hospital Command Console
+                    </p>
+                    <p className="text-sm font-bold text-gray-400 max-w-2xl leading-relaxed">Precision blood bank management and emergency coordination platform.</p>
                 </div>
             </div>
 
@@ -401,28 +314,6 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                         </div>
                     </div>
 
-                    {/* NEW: Communications Quick Access */}
-                    <motion.div
-                        whileHover={{ y: -5 }}
-                        onClick={() => navigate('/dashboard/messages')}
-                        className="glass-panel rounded-[48px] p-8 border-[#FF1744]/10 shadow-2xl shadow-red-100/30 cursor-pointer group bg-gradient-to-br from-white to-red-50/30"
-                    >
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="w-14 h-14 bg-red-50 rounded-[22px] flex items-center justify-center text-[#FF1744] group-hover:scale-110 transition-transform shadow-inner">
-                                <MessageCircle size={24} />
-                            </div>
-                            {pendingCount > 0 && (
-                                <span className="px-4 py-2 bg-[#FF1744] text-white text-[10px] font-black rounded-full shadow-lg shadow-red-200 animate-bounce">
-                                    {pendingCount} NEW
-                                </span>
-                            )}
-                        </div>
-                        <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight mb-2">Communications</h3>
-                        <p className="text-xs font-bold text-gray-400 leading-relaxed uppercase tracking-wider">Coordinate with donors and other facilities.</p>
-                        <div className="mt-6 flex items-center gap-2 text-[#FF1744] font-black text-[10px] uppercase tracking-widest">
-                            Open Inbox <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
-                        </div>
-                    </motion.div>
                 </div>
 
                 {/* 2. Operations Center - Missions & Appointments Grid */}
@@ -436,7 +327,7 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                                     activeDashboardTab === 'missions' ? "text-gray-900" : "text-gray-300 hover:text-gray-400"
                                 )}
                             >
-                                Active Missions
+                                Active Blood Requests
                                 {activeDashboardTab === 'missions' && <motion.div layoutId="tab-underline" className="absolute bottom-[-2px] left-0 right-0 h-1 bg-[#FF1744] rounded-full" />}
                             </button>
                             <button
@@ -633,77 +524,8 @@ export const HospitalDashboard = ({ user }: { user: UserType }) => {
                 </div>
             </div>
 
-            {/* Modals */}
-            <AnimatePresence>
-                {/* Inventory Modal (Existing) */}
-                {isManagingStock && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="max-w-2xl w-full">
-                            <Card className="bg-white rounded-[60px] border-none shadow-2xl overflow-hidden">
-                                <CardHeader className="p-12 pb-0 flex flex-row items-center justify-between">
-                                    <div className="space-y-2 text-left">
-                                        <h3 className="text-4xl font-black text-gray-900 tracking-tighter">Inventory Console</h3>
-                                    </div>
-                                    <button onClick={() => setIsManagingStock(false)} className="p-4 bg-gray-50 hover:bg-gray-100 rounded-3xl transition-colors"><X size={28} /></button>
-                                </CardHeader>
-                                <CardContent className="p-12 space-y-10">
-                                    {/* Input Logic Same as Before */}
-                                    {/* Simplified for brevity in Rewrite, assuming logic copied */}
-                                    <div className="grid grid-cols-2 gap-6">
-                                        {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((type: string) => {
-                                            const val = editableStock.find((s: any) => s.bloodType === type)?.units || 0;
-                                            return (
-                                                <div key={type} className="flex items-center justify-between p-6 bg-gray-50 rounded-[32px] border-2 border-gray-100 focus-within:border-red-200 focus-within:bg-white transition-all">
-                                                    <span className="text-2xl font-black text-gray-900">{type}</span>
-                                                    <div className="flex items-center gap-4">
-                                                        <button onClick={() => {
-                                                            const newStock = [...editableStock];
-                                                            const idx = newStock.findIndex(s => s.bloodType === type);
-                                                            if (idx >= 0) newStock[idx].units = Math.max(0, newStock[idx].units - 1);
-                                                            else newStock.push({ bloodType: type, units: 0 });
-                                                            setEditableStock(newStock);
-                                                        }} className="w-10 h-10 bg-white border border-gray-200 rounded-xl flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-colors"><Minus size={18} /></button>
-                                                        <span className="w-12 text-center font-black text-xl text-[#FF1744]">{val}</span>
-                                                        <button onClick={() => {
-                                                            const newStock = [...editableStock];
-                                                            const idx = newStock.findIndex(s => s.bloodType === type);
-                                                            if (idx >= 0) newStock[idx].units += 1;
-                                                            else newStock.push({ bloodType: type, units: 1 });
-                                                            setEditableStock(newStock);
-                                                        }} className="w-10 h-10 bg-white border border-gray-200 rounded-xl flex items-center justify-center hover:bg-green-50 hover:text-green-500 transition-colors"><Plus size={18} /></button>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                    <Button onClick={handleUpdateStock} disabled={isSavingStock} className="w-full h-24 bg-gray-900 hover:bg-black text-white rounded-[32px] font-black text-lg uppercase tracking-widest shadow-2xl flex items-center justify-center gap-4">{isSavingStock ? <Loader2 className="animate-spin" /> : <Save size={24} />} Commit Changes</Button>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    </div>
-                )}
-
-                {/* Start Drive Modal (Existing) */}
-                {isStartingDrive && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="max-w-md w-full">
-                            <Card className="bg-white rounded-[60px] border-none shadow-2xl overflow-hidden">
-                                <CardHeader className="p-12 pb-0 flex flex-row items-center justify-between">
-                                    <div className="space-y-2 text-left">
-                                        <h3 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Initiate Drive</h3>
-                                    </div>
-                                    <button onClick={() => setIsStartingDrive(false)} className="p-4 bg-gray-50 rounded-3xl"><X size={24} /></button>
-                                </CardHeader>
-                                <CardContent className="p-12 space-y-8">
-                                    {/* Inputs simplified */}
-                                    <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 block text-left">Target Blood Type</label><select value={driveData.bloodType} onChange={(e) => setDriveData({ ...driveData, bloodType: e.target.value })} className="w-full h-20 bg-gray-50 border-none rounded-[28px] px-8 text-xl font-black tracking-widest outline-none">{['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(t => <option key={t} value={t}>{t}</option>)}</select></div>
-                                    <div className="space-y-2"><label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 block text-left">Units Required</label><input type="number" value={driveData.units} onChange={(e) => setDriveData({ ...driveData, units: parseInt(e.target.value) })} className="w-full h-20 bg-gray-50 border-none rounded-[28px] px-8 text-xl font-black outline-none" /></div>
-                                    <Button onClick={handleStartDrive} className="w-full h-20 bg-[#FF1744] hover:bg-[#D50000] text-white rounded-[32px] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-red-200">Launch Network Broadcast</Button>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    </div>
-                )}
+             {/* Modals */}
+             <AnimatePresence>
 
                 {/* Direct Fulfill Modal (NEW) */}
                 {selectedDonation && isDirectFulfilling && (

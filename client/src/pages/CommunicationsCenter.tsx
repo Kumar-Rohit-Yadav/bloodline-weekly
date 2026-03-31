@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import {
     Search, MessageSquare, Send, X, MoreVertical,
     Calendar, MapPin, Droplet, ShieldCheck,
@@ -239,7 +240,12 @@ export default function CommunicationsCenter() {
             )}>
                 <div className="p-8 space-y-6">
                     <div className="flex items-center justify-between">
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Inbox</h1>
+                        <div className="flex items-center gap-4">
+                            <Link to="/dashboard" className="p-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors shadow-sm">
+                                <ArrowLeft size={20} className="text-gray-400" />
+                            </Link>
+                            <h1 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Inbox</h1>
+                        </div>
                         <div className="flex gap-2">
                             {pendingRequests.length > 0 && (
                                 <div className="px-3 py-1 bg-red-500 text-white rounded-full text-[9px] font-black uppercase tracking-widest animate-pulse">

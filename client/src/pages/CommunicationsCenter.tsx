@@ -4,7 +4,7 @@ import {
     Search, MessageSquare, Send, X, MoreVertical,
     Calendar, MapPin, Droplet, ShieldCheck,
     ArrowLeft, Loader2, User, Building2,
-    CheckCircle2, Clock, Inbox, Filter
+    CheckCircle2, Clock, Inbox, Filter, Trash2
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
@@ -463,13 +463,14 @@ export default function CommunicationsCenter() {
                                         </p>
                                     </div>
                                 </div>
-                                <button
+                                <Button
+                                    variant="ghost"
                                     onClick={() => handleDeleteConnection(selectedConnection._id)}
-                                    className="p-4 hover:bg-red-50 rounded-2xl transition-colors text-gray-400 hover:text-red-500 group"
-                                    title="Remove Connection"
+                                    className="h-12 px-5 bg-red-50 text-red-500 hover:bg-red-100 rounded-2xl flex items-center gap-2 border border-red-100 transition-all group"
                                 >
-                                    <X size={20} className="group-hover:rotate-90 transition-transform" />
-                                </button>
+                                    <Trash2 size={16} className="group-hover:scale-110 transition-transform text-red-500" />
+                                    <span className="font-black text-[10px] uppercase tracking-widest">Delete Coordination</span>
+                                </Button>
                             </div>
                         </div>
 
